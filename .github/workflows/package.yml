@@ -38,10 +38,16 @@ jobs:
           submodules: recursive
       - uses: actions/checkout@v4
         with:
-          # Does not exist yet: the GS101/Pixel 6a UEFI platform package.
+          # The GS101/Pixel 6a platform package; the firmware preflight installs
+          # bluejayPkg and GS101Pkg into the Mu-Silicium checkout below.
           repository: tuxmanxd/uefi-bluejay
           path: uefi-bluejay
           submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          repository: Project-Silicium/Mu-Silicium
+          path: mu
+          submodules: false
       - name: tools
         run: |
           brew install dtc llvm lld cmake mtools blacktop/tap/ipsw
@@ -67,7 +73,7 @@ jobs:
         env:
           UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: scripts/package.sh --os "${{ inputs.os }}" --uefi ../uefi-bluejay
+        run: scripts/package.sh --os "${{ inputs.os }}" --uefi ../mu
       - name: images
         uses: actions/upload-artifact@v4
         with:

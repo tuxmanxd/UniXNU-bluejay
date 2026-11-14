@@ -25,7 +25,8 @@ its shim and patch stack are not UniXNU components.
 
 ## What is missing
 
-- No `uefi-bluejay` Mu-Silicium platform: `[firmware]` paths are a target layout.
+- The `uefi-bluejay` Mu-Silicium platform exists but has never been built or
+  flashed; `[firmware]` paths target it.
 - No GS101 UFS, FTM5 touch, PMIC or DWC3 component; those areas are `planned`.
 - UniXNU ships no iPhone/iOS 16.7 profile. This repository selects the oldest
   shipped profile, `ipados-17.7.11-21H461`, as a placeholder.

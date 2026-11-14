@@ -29,15 +29,35 @@ source = "device:dts/bluejay.dts"
 include_dirs = ["soc:dts"]
 
 [firmware]
-# uefi-bluejay does not exist yet: MU-Silicium has no GS101/Pixel 6a platform.
-# The paths below are the layout to create; see the firmware area of porting.toml.
+# Built from tuxmanxd/uefi-bluejay (Mu-Silicium platform for bluejay/GS101).
+# scripts/uefi-apply.py installs bluejayPkg, GS101Pkg and the FD config into
+# the Mu-Silicium checkout named by --uefi before the EDK II build runs.
+# --uefi must be a Mu-Silicium checkout (for example Project-Silicium/Mu-Silicium).
 config = "bluejay"
 dsc = "Platforms/Google/bluejayPkg/bluejay.dsc"
 fd = "Build/bluejayPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
-packages = ["{uefi}", "{uefi}/Platforms/Google", "{tree}/package", "{tree}/drivers/DarwinBoot", "{edk2}"]
+submodules = ["Binaries", "Common/Mu", "Common/Mu_OEM_Sample", "Silicium-ACPI", "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl"]
+preflight = ["scripts/uefi-apply.py"]
+packages = [
+  "{uefi}",
+  "{tree}/package",
+  "{tree}/drivers/DarwinBoot",
+  "{edk2}",
+  "{uefi}/Platforms/Google",
+  "{uefi}/Common/Mu",
+  "{uefi}/Common/Mu_OEM_Sample",
+  "{uefi}/Silicon/Google",
+  "{uefi}/Silicon/Samsung",
+  "{uefi}/Silicon/Silicium",
+  "{uefi}/Silicium-ACPI",
+  "{uefi}/Silicium-ACPI/Platforms/Samsung",
+  "{uefi}/Silicium-ACPI/Silicon/Samsung",
+]
 
 [firmware.defines]
 DEVICE_MODEL = "bluejay"
+# Add UniXNU.inf, UniXNUDxe.inf, UniXNURamDiskDxe.inf and DarwinBoot.inf.
+UNIXNU_PAYLOAD = 1
 
 [bootimg]
 dtb = "build/bluejay/bluejay.dtb"
