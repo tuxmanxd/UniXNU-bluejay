@@ -21,7 +21,16 @@ lba_bytes = 4096
 [kernel]
 defconfig = "bluejay_defconfig"
 config_fragments = ["arch:configs/common.config", "soc:configs/gs101.config", "os:configs/ipados.config"]
-patch_series = ["arch:patches/xnu/series", "soc:patches/xnu/series", "os:patches/xnu/series", "device:patches/xnu/series"]
+patch_series = [
+  "arch:patches/xnu/series",
+  "soc:patches/xnu/series",
+  # The os series is unrolled so the boot-progress entry can be replaced by the
+  # device copy (which drops the Qualcomm-only sheng_pmgr_run hunk); the two
+  # XnuPrelink kit patches it also lists stay in their original position.
+  "device:patches/xnu/series",
+  "component:XnuPrelink/patches/xnu-10063.141.1-security-init.patch",
+  "component:XnuPrelink/patches/xnu-10063.141.1-sparse-index.patch",
+]
 archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py"]
 
 [device_tree]
