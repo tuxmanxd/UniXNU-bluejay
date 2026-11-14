@@ -68,6 +68,12 @@ jobs:
             echo 'Set the repository secret UNIXNU_UNIQUE_CHIP_ID: the platform seed of the device, 8 hex digits.' >&2
             exit 1
           fi
+      - name: firmware overlay
+        # The firmware step reads mu/Resources/Configs/bluejay.toml before its
+        # [firmware] preflight runs, so the overlay has to be installed first.
+        env:
+          UNIXNU_UEFI: ${{ github.workspace }}/mu
+        run: python3 device/scripts/uefi-apply.py
       - name: package
         working-directory: device
         env:
