@@ -24,12 +24,9 @@ config_fragments = ["arch:configs/common.config", "soc:configs/gs101.config", "o
 patch_series = [
   "arch:patches/xnu/series",
   "soc:patches/xnu/series",
-  # The os series is unrolled so the boot-progress entry can be replaced by the
-  # device copy (which drops the Qualcomm-only sheng_pmgr_run hunk); the two
-  # XnuPrelink kit patches it also lists stay in their original position.
+  # Replaces os:patches/xnu/series: same three entries, with the boot-progress
+  # patch taken from the device copy that drops the Qualcomm-only hunk.
   "device:patches/xnu/series",
-  "component:XnuPrelink/patches/xnu-10063.141.1-security-init.patch",
-  "component:XnuPrelink/patches/xnu-10063.141.1-sparse-index.patch",
 ]
 archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py"]
 

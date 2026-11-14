@@ -1,10 +1,15 @@
-# Device patches for the pinned XNU, one per line in application order.
+# Device patches and os-series replacements, one per line in application order.
 #
-# zzz-boot-progress.patch is a local copy of the os profile's boot-progress
-# patch (profiles/os/ipados-17.7.11-21H461/patches/xnu/series). The copy drops
-# one hunk in bsd/kern/bsd_init.c that wraps sheng_pmgr_run() in
-# boot_progress_stage() calls: that block only exists after a Qualcomm SoC's
-# sheng-platform-power patch, which GS101 does not apply, so the os copy fails
-# to apply here ("patch does not apply" at bsd_init.c:773). Everything else in
-# the patch is unchanged.
-zzz-boot-progress.patch
+# This file replaces os:patches/xnu/series, which lists exactly three entries:
+# zzz-boot-progress.patch and the two XnuPrelink kit patches. patch_series
+# entries are series files, so those three are repeated here with the first one
+# pointing at the device copy.
+#
+# zzz-boot-progress.patch is that device copy. It drops one hunk in
+# bsd/kern/bsd_init.c that wraps sheng_pmgr_run() in boot_progress_stage()
+# calls: that block only exists after a Qualcomm SoC's sheng-platform-power
+# patch, which GS101 does not apply, so the os copy fails to apply here
+# ("patch does not apply" at bsd_init.c:773). Everything else is unchanged.
+device:patches/xnu/zzz-boot-progress.patch
+component:XnuPrelink/patches/xnu-10063.141.1-security-init.patch
+component:XnuPrelink/patches/xnu-10063.141.1-sparse-index.patch
