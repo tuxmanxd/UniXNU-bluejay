@@ -1,0 +1,92 @@
+schema_version = 2
+
+[board]
+name = "bluejay"
+soc = "GS101"
+soc_source = "gs101"
+os_profile = "ipados-17.7.11-21H461"
+description = "Google Pixel 6a (Tensor G1)"
+kit = "bluejay"
+
+[components]
+include = ["ArmDTPlatform", "ArmCpu", "XnuPrelink", "DarwinBoot", "GopFramebuffer"]
+
+[userdata]
+# GPT entry "userdata" on UFS LUN 0: first=0x22F1E6 last=0x1DC03FA, 4096-byte LBAs.
+# 28906005 blocks = 110.2 GiB (the XNU log prints 112914 MiB).
+first_lba = 2290150
+last_lba = 31130618
+lba_bytes = 4096
+
+[kernel]
+defconfig = "bluejay_defconfig"
+config_fragments = ["arch:configs/common.config", "soc:configs/gs101.config", "os:configs/ipados.config"]
+patch_series = ["arch:patches/xnu/series", "soc:patches/xnu/series", "os:patches/xnu/series", "device:patches/xnu/series"]
+archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py"]
+
+[device_tree]
+source = "device:dts/bluejay.dts"
+include_dirs = ["soc:dts"]
+
+[firmware]
+# uefi-bluejay does not exist yet: MU-Silicium has no GS101/Pixel 6a platform.
+# The paths below are the layout to create; see the firmware area of porting.toml.
+config = "bluejay"
+dsc = "Platforms/Google/bluejayPkg/bluejay.dsc"
+fd = "Build/bluejayPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
+packages = ["{uefi}", "{uefi}/Platforms/Google", "{tree}/package", "{tree}/drivers/DarwinBoot", "{edk2}"]
+
+[firmware.defines]
+DEVICE_MODEL = "bluejay"
+
+[bootimg]
+dtb = "build/bluejay/bluejay.dtb"
+
+[bootimg.image]
+# Same Android boot image layout the pixelios shim is loaded with (shim/build.sh).
+base = 0
+kernel_offset = 0x8000
+tags_offset = 0x100
+pagesize = 4096
+header_version = 0
+
+[payload]
+volume = "BLUEJAY"
+size_mib = 192
+loader = "firmware"
+title = "UniXNU"
+dram_size = "0x100000000"
+panic_screen = true
+timeout = 3
+kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
+
+[payload.adt]
+# 0x8015 is the Apple chip id the pixelios ADT emitter uses for this port
+# (tools/mkadt.py: chip-id). It is an XNU platform identity, not the GS101 id.
+chip_id = "8015"
+owned_memory_size = "0x100000000"
+unique_chip_id = "required"
+packed_data_ramdisk = true
+psci_method = "smc"
+
+[adt.defaults.u32]
+# No Apple PMGR or SEP is present: report a virtual platform so AMFI does not
+# wait for an ApplePMGRNub.
+"vmm-present" = 1
+
+[adt.chosen.u32]
+# GS101 has no CTRR: kernel text stays writable by hardware.
+"kernel-ctrr-to-be-enabled" = 0
+
+[adt.buttons.string]
+compatible = "buttons"
+device_type = "buttons"
+
+[adt.buttons.strings]
+button-names = ["hold", "voldown", "volup"]
+
+[package]
+unixnu = "../UniXNU"
+
+[package.defconfig]
+"ipados-17.7.11-21H461" = "bluejay_defconfig"

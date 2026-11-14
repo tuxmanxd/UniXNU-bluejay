@@ -1,0 +1,7 @@
+# Device patches for the pinned XNU, one per line in application order.
+#
+# Empty on purpose. The pixelios XNU 8796 patch stack does not apply to the
+# XNU revision UniXNU pins; each behaviour that is still needed (framebuffer
+# console, boot CPU, device tree platform) is selected through the arch
+# series and a component instead. Add a patch here only with
+# https://unixnu.com/xnu/source-and-patches read and the series updated.

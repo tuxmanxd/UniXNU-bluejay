@@ -1,0 +1,50 @@
+/dts-v1/;
+/include/ "gs101.dtsi"
+
+/ {
+    model = "Google Pixel 6a";
+    compatible = "google,bluejay", "google,gs101";
+
+    // XNU receives the hole-free high DRAM range only. The low bank
+    // (0x80000000, 2 GiB) is full of firmware no-map carve-outs, including
+    // ABL's 16 MiB USB DMA region at 0xf8800000, so it is not described here.
+    memory@880000000 {
+        device_type = "memory";
+        reg = <0x8 0x80000000 0x1 0x00000000>;
+    };
+
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        // Framebuffer set up by ABL: 1080x2400 a8r8g8b8, stride 4320.
+        // It lives below the XNU range, so a no-map reservation is enough.
+        framebuffer@fac00000 {
+            label = "cont_splash_region";
+            reg = <0 0xfac00000 0 0x9e3400>;
+            no-map;
+        };
+    };
+
+    touch {
+        compatible = "st,ftm5";
+        unixnu,adt-name = "touch";
+        st,max-coords = <1079 2399>;
+        spi-max-frequency = <10000000>;
+        status = "disabled";        // driver pending (see porting.toml input area)
+    };
+};
+
+// Tensor G1: 4x Cortex-A55 (E cluster) and 4x big cores (P cluster).
+&cpu0 { unixnu,cluster-type = "E"; };
+&cpu1 { unixnu,cluster-type = "E"; };
+&cpu2 { unixnu,cluster-type = "E"; };
+&cpu3 { unixnu,cluster-type = "E"; };
+&cpu4 { unixnu,cluster-type = "P"; };
+&cpu5 { unixnu,cluster-type = "P"; };
+&cpu6 { unixnu,cluster-type = "P"; };
+&cpu7 { unixnu,cluster-type = "P"; };
+
+&ufs { status = "okay"; };
+&ufsphy { status = "okay"; };

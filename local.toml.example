@@ -1,0 +1,14 @@
+# Copy to local.toml (ignored by Git) to override sources for this machine.
+# Each subdirectory of a category directory is one module. The command line
+# (--local, --local-drivers, ...) takes precedence.
+#
+# [local]
+# drivers = "/path/to/drivers"
+# kits = "/path/to/kits"
+
+# Format 2 source override: use the SoC repository from the sibling checkout
+# instead of the git pin in feeds.toml. Relative paths resolve from this file.
+[[source]]
+kind = "soc"
+name = "gs101"
+local = "../UniXNU-gs101-common"

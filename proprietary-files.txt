@@ -1,0 +1,13 @@
+# Required firmware inputs: relative path | source | SHA-256 | consumer
+#
+# The Pixel 6a firmware comes from Google's factory image for bluejay. Hashes are
+# not yet extracted; do not guess them. Extract, hash and record each file here
+# before the firmware area can leave "planned".
+#
+# Needed classes (consumers in brackets):
+#   vendor firmware for the GS101 display/DPU          [display, GopFramebuffer]
+#   STMicro FTM5 touch firmware                        [input]
+#   Broadcom Wi-Fi firmware and NVRAM (PCIe)           [network]
+#   Bluetooth firmware                                 [network]
+#   GS101 audio DSP firmware and ACPM images           [audio, power]
+#   modem firmware and EFS/NV                          [cellular, out of scope]

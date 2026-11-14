@@ -1,0 +1,5 @@
+[[source]]
+name = "gs101"
+kind = "soc"
+git = "https://github.com/tuxmanxd/UniXNU-gs101-common"
+commit = "e95b7380e81c4f69fb85903e23019724dc3119af"
