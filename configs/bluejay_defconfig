@@ -6,7 +6,14 @@ CONFIG_XNU_ARM_DT_PLATFORM=y
 CONFIG_XNU_ARMCPU=y
 CONFIG_XNU_BUILD_ARCHIVES=y
 CONFIG_XNU_CRYPTO_BOOTSTRAP="prelinked"
-CONFIG_XNU_NATIVE_UFS=y
-CONFIG_XNU_NATIVE_LEGACY_DISPLAY=y
+# The only kernel UFS component in the catalog is ShengUfs (SM8550). GS101 has
+# no kernel storage driver yet, so the link must not ask for libShengUfs.a.
+CONFIG_XNU_NATIVE_UFS=n
+# NativeAES is built from the SoftwareAES component, which this board does not
+# select, so the arch fragment's y would require an archive nothing builds.
+CONFIG_XNU_NATIVE_AES=n
+# build-gop-legacy-display.py is not in this tree and the board has no display
+# driver to supply the probe, so the archive cannot exist.
+CONFIG_XNU_NATIVE_LEGACY_DISPLAY=n
 CONFIG_XNU_NATIVE_ADRENO=n
 CONFIG_XNU_ARMVIRT_PLATFORM=n

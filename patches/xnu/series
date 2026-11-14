@@ -1,15 +1,22 @@
 # Device patches and os-series replacements, one per line in application order.
 #
-# This file replaces os:patches/xnu/series, which lists exactly three entries:
-# zzz-boot-progress.patch and the two XnuPrelink kit patches. patch_series
-# entries are series files, so those three are repeated here with the first one
-# pointing at the device copy.
+# This file replaces os:patches/xnu/series, which lists three entries:
+# zzz-boot-progress.patch and two XnuPrelink kit patches. patch_series entries
+# are series files, and the boot-progress patch is not applied here, so only the
+# two kit patches remain.
 #
-# zzz-boot-progress.patch is that device copy. It drops one hunk in
-# bsd/kern/bsd_init.c that wraps sheng_pmgr_run() in boot_progress_stage()
-# calls: that block only exists after a Qualcomm SoC's sheng-platform-power
-# patch, which GS101 does not apply, so the os copy fails to apply here
-# ("patch does not apply" at bsd_init.c:773). Everything else is unchanged.
-device:patches/xnu/zzz-boot-progress.patch
+# zzz-boot-progress.patch (kept in this directory) adds boot_progress_stage()
+# calls to arm_init.c, startup.c, bsd_init.c, kern_exec.c, kern_exit.c,
+# video_console.c and pe_kprintf.c and includes <kern/boot_progress.h>. Neither
+# the header nor an implementation exists in this UniXNU tree, and
+# scripts/build-boot-progress.py (the builder the kernel script calls for
+# CONFIG_XNU_BOOT_PROGRESS=1) is absent too. It also requires
+# CONFIG_XNU_NATIVE_UFS=1, which GS101 cannot satisfy. Without the layer the
+# kernel links with undefined _boot_progress_stage symbols, so the patch stays
+# out of the series until a display-capable boot-progress layer exists.
+#
+# The device copy also drops one hunk that wraps sheng_pmgr_run() in
+# boot_progress_stage() calls: that block only exists after a Qualcomm SoC's
+# sheng-platform-power patch, which GS101 does not apply.
 component:XnuPrelink/patches/xnu-10063.141.1-security-init.patch
 component:XnuPrelink/patches/xnu-10063.141.1-sparse-index.patch

@@ -28,7 +28,16 @@ patch_series = [
   # patch taken from the device copy that drops the Qualcomm-only hunk.
   "device:patches/xnu/series",
 ]
-archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py"]
+# arch profile order. CONFIG_XNU_SOURCE_MOCKFS comes from the os fragment, so
+# vfs_conf.o references the mockfs fixture and the final link needs it.
+archives = [
+  "build-corecrypto-14.py",
+  "build-corecrypto-14.py --namespace",
+  "component:ArmDTPlatform",
+  "component:ArmCpu",
+  "build-libpthread-kernel.py",
+  "build-mockfs-fixture.py",
+]
 
 [device_tree]
 source = "device:dts/bluejay.dts"
