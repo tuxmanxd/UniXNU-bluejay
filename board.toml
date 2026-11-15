@@ -52,7 +52,9 @@ config = "bluejay"
 dsc = "Platforms/Google/bluejayPkg/bluejay.dsc"
 fd = "Build/bluejayPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
 submodules = ["Binaries", "Common/Mu", "Common/Mu_OEM_Sample", "Silicium-ACPI", "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl"]
-preflight = ["scripts/uefi-apply.py", "scripts/build-boot-dtb.py"]
+# darwinboot-debug.py is TEMPORARY: it makes a failed xnu boot draw its stage
+# and status on the panel instead of returning to the menu, which repaints.
+preflight = ["scripts/uefi-apply.py", "scripts/build-boot-dtb.py", "scripts/darwinboot-debug.py"]
 packages = [
   "{uefi}",
   "{tree}/package",
