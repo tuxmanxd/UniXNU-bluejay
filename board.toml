@@ -78,12 +78,15 @@ UNIXNU_PAYLOAD = 1
 dtb = "build/bluejay/bluejay.dtb"
 
 [bootimg.image]
-# Same Android boot image layout the pixelios shim is loaded with (shim/build.sh).
+# Same layout as the firmware-only image measured booting on this phone
+# (docs/EVIDENCE.md in uefi-bluejay): Android header v4, uncompressed shim plus
+# FD. The pixelios shim is loaded with v0, but v4 is the layout verified here.
 base = 0
 kernel_offset = 0x8000
 tags_offset = 0x100
 pagesize = 4096
-header_version = 0
+header_version = 4
+kernel_compression = "none"
 
 [payload]
 volume = "BLUEJAY"
