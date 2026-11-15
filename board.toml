@@ -100,7 +100,6 @@ size_mib = 54
 loader = "firmware"
 title = "UniXNU"
 dram_size = "0xf0000000"
-panic_screen = true
 # Temporary bring-up probe (scripts/patch-xnu-entry-probe.py in UniXNU):
 # paint band 1 at kernel entry, band 2 before the MMU enable, then wait this
 # many seconds and reset through PSCI. On the phone the first two bands are
@@ -109,6 +108,11 @@ panic_screen = true
 # after ~8 s means yes, no reboot means it faults at/just after it. Remove
 # this key (and panic_screen) once the boot path is stable.
 entry_probe_reset_delay = 8
+# The panic screen (0xa1f bytes) is placed right after the last probe cave and
+# would run 0xaf bytes past the padding end at 0xfffffff0073f0ff0 when stage 3
+# is installed, so the tool refuses. Keep it off while a reset probe is active;
+# turn it back on once the probes are removed.
+panic_screen = false
 timeout = 3
 kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
 
