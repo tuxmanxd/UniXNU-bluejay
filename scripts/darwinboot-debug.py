@@ -111,6 +111,46 @@ if "BOOT ENTERED" not in text:
     DiagDraw (DbEntry, 9);
   }''', 1)
 
+# ---------------------------------------------------------------------------
+# 3b. Ask the secure monitor whether PSCI offers SYSTEM_RESET at all. The
+#     kernel probe's stage 3 resets through PSCI, so a frozen panel after it
+#     means either the MMU enable faulted or there is no reset to call; the
+#     PSCI version and feature bits tell the two apart. Non-destructive.
+# ---------------------------------------------------------------------------
+SMC = 'STATIC CONST CHAR8  *mDbgStage = "start";'
+if "DbSmc" not in text:
+    if SMC not in text:
+        sys.exit("darwinboot-debug: mDbgStage anchor missing for DbSmc")
+    text = text.replace(SMC, SMC + '''
+STATIC UINT64
+DbSmc (
+  IN UINT64  Function,
+  IN UINT64  Argument
+  )
+{
+  register UINT64  X0 __asm__ ("x0") = Function;
+  register UINT64  X1 __asm__ ("x1") = Argument;
+  __asm__ __volatile__ ("smc #0" : "+r" (X0) : "r" (X1)
+                        : "x2", "x3", "x4", "x5", "x6", "x7", "memory");
+  return X0;
+}''', 1)
+
+ENTRY_TAIL = "    DiagDraw (DbEntry, 9);\n  }"
+if "PSCI VER=" not in text:
+    if ENTRY_TAIL not in text:
+        sys.exit("darwinboot-debug: BOOT ENTERED block anchor missing")
+    text = text.replace(ENTRY_TAIL, ENTRY_TAIL + '''
+  {
+    CHAR16  DbPsci[96];
+    UINT64  DbVer, DbRst, DbOff;
+    DiagDraw (L"PSCI QUERY", 10);
+    DbVer = DbSmc (0x84000000, 0);           // PSCI_VERSION
+    DbRst = DbSmc (0x8400000A, 0x84000009);  // FEATURES(SYSTEM_RESET)
+    DbOff = DbSmc (0x8400000A, 0x84000008);  // FEATURES(SYSTEM_OFF)
+    UnicodeSPrint (DbPsci, sizeof (DbPsci), L"PSCI VER=%lx RST=%lx OFF=%lx", DbVer, DbRst, DbOff);
+    DiagDraw (DbPsci, 11);
+  }''', 1)
+
 MARKS = [
     ("  Status = gBS->HandleProtocol (Request->Volume, &gEfiSimpleFileSystemProtocolGuid, (VOID **)&Fs);", "volume"),
     ("  Status = ReadFile (Root, Request->KernelPath, KERNEL_LIMIT, &Image, &ImageSize);", "read-kernel"),
