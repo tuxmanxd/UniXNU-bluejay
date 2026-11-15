@@ -52,7 +52,7 @@ config = "bluejay"
 dsc = "Platforms/Google/bluejayPkg/bluejay.dsc"
 fd = "Build/bluejayPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
 submodules = ["Binaries", "Common/Mu", "Common/Mu_OEM_Sample", "Silicium-ACPI", "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl"]
-preflight = ["scripts/uefi-apply.py"]
+preflight = ["scripts/uefi-apply.py", "scripts/build-boot-dtb.py"]
 packages = [
   "{uefi}",
   "{tree}/package",
