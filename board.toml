@@ -99,7 +99,7 @@ volume = "BLUEJAY"
 size_mib = 54
 loader = "firmware"
 title = "UniXNU"
-dram_size = "0xfc000000"
+dram_size = "0xfbe00000"
 panic_screen = true
 timeout = 3
 kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
@@ -108,7 +108,7 @@ kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
 # 0x8015 is the Apple chip id the pixelios ADT emitter uses for this port
 # (tools/mkadt.py: chip-id). It is an XNU platform identity, not the GS101 id.
 chip_id = "8015"
-owned_memory_size = "0xfc000000"
+owned_memory_size = "0xfbe00000"
 unique_chip_id = "required"
 packed_data_ramdisk = true
 psci_method = "smc"

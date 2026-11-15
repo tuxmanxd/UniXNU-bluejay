@@ -135,9 +135,9 @@ if "FAIL %r AT %a" not in text:
     CHAR16  DbLine[96];
     CHAR16  DbPath[96];
     UnicodeSPrint (DbLine, sizeof (DbLine), L"FAIL %r AT %a", Status, mDbgStage);
-    DiagDraw (DbLine, 0);
+    DiagDraw (DbLine, 18);
     UnicodeSPrint (DbPath, sizeof (DbPath), L"%s", (Request->KernelPath != NULL) ? Request->KernelPath : L"(no path)");
-    DiagDraw (DbPath, 1);
+    DiagDraw (DbPath, 19);
     CpuDeadLoop ();
   }
   if (Root != NULL) { Root->Close (Root); }''', 1)

@@ -11,10 +11,16 @@
     // The high pair is measured: 2 GiB at 0x880000000 and 2 GiB at
     // 0x900000000, contiguous, with no reservation inside. The first 64 MiB
     // (0x880000000..0x884000000) is the firmware's payload window: BootShim
-    // copies the UniXNU payload there, so XNU starts at 0x884000000.
+    // copies the UniXNU payload there, so the free run starts at 0x884000000
+    // and is 0xfc000000 long. DarwinBoot places its window at
+    // ALIGN(run, 2 MiB) + (kernel base & 2 MiB - 1), which for this kernel is
+    // 0x4000, so at most 0xfc000000 - 0x4000 = 0xfbffc000 bytes fit; floored
+    // to the 2 MiB block the loader requires, that is 0xfbe00000. Declaring
+    // the whole run made AllocateWindow fail with Out of Resources (measured
+    // on the phone: NO WINDOW fc000000 BIG RUN fc000000 @ 884000000).
     memory@884000000 {
         device_type = "memory";
-        reg = <0x8 0x84000000 0x0 0xfc000000>;
+        reg = <0x8 0x84000000 0x0 0xfbe00000>;
     };
 
     reserved-memory {
