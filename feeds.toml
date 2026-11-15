@@ -3,3 +3,22 @@ name = "gs101"
 kind = "soc"
 git = "https://github.com/tuxmanxd/UniXNU-gs101-common"
 commit = "e95b7380e81c4f69fb85903e23019724dc3119af"
+
+# The Mu_Basecore commit Mu-Silicium fb4efb37 pins as its own submodule
+# (measured: 64f47893 has the MU_CHANGE DmaMap with IommuBase and DmaId).
+# The upstream release/202608 tip has the six-parameter DmaMap, and SamsungPkg's
+# MshcDxe calls the seven-parameter one, so the firmware build fails with
+# "too many arguments to function call" unless both trees use this commit.
+[[source]]
+name = "edk2"
+kind = "refer"
+git = "https://github.com/microsoft/mu_basecore.git"
+ref = "release/202608"
+commit = "64f478939955e45faa632c160ae2a75a5ff7ef7f"
+submodules = [
+  "MdePkg/Library/BaseFdtLib/libfdt",
+  "MdePkg/Library/MipiSysTLib/mipisyst",
+  "BaseTools/Source/C/BrotliCompress/brotli",
+  "MdeModulePkg/Library/BrotliCustomDecompressLib/brotli",
+  "SecurityPkg/DeviceSecurity/SpdmLib/libspdm",
+]
