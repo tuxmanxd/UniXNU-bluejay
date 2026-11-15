@@ -3,8 +3,9 @@
 
 The boot menu reports only the EFI status of a failed xnu entry, and
 DarwinBoot's own diagnostics go to the console, which the menu repaints
-immediately. This patch draws the failing stage and status on the framebuffer
-and halts, so a photo of the screen names the exact lookup that failed.
+immediately. This patch draws the entry conditions and the failing stage on
+the framebuffer and halts, so a photo of the screen names the exact lookup
+that failed.
 
 Remove this script from [firmware] preflight once the failure is understood.
 Run from the build tree (the firmware preflight cwd).
@@ -38,17 +39,33 @@ if STATIC not in text:
     sys.exit("darwinboot-debug: mImage anchor missing")
 text = text.replace(STATIC, STATIC + '\nSTATIC CONST CHAR8  *mDbgStage = "start";', 1)
 
-START = "  ZeroMem (CommandLine, sizeof (CommandLine));"
-if START not in text:
-    sys.exit("darwinboot-debug: command-line anchor missing")
-text = text.replace(START, '''  mDbgStage = "command-line";
+# Reached only when Boot() is entered at all: its absence means the loader
+# protocol was never found, or the entry conditions below rejected the boot.
+ENTER = "  (VOID)This;"
+if ENTER not in text:
+    sys.exit("darwinboot-debug: Boot() entry anchor missing")
+text = text.replace(ENTER, ENTER + '''
   {
-    CHAR16  DbStart[64];
-    UnicodeSPrint (DbStart, sizeof (DbStart), L"BOOT START %s",
-                   (Request->KernelPath != NULL) ? Request->KernelPath : L"(no path)");
-    DiagDraw (DbStart, 3);
-  }
-''' + START, 1)
+    CHAR16  DbEntry[96];
+    UnicodeSPrint (DbEntry, sizeof (DbEntry), L"BOOT ENTERED EL=%lx DT=%lx KX=%lx",
+                   DarwinCurrentEl (), (UINT64)(UINTN)Request->DeviceTree, (UINT64)Request->KextCount);
+    DiagDraw (DbEntry, 9);
+  }''', 1)
+
+# The early rejection in Boot(): draw its inputs before the menu repaints.
+EARLY = """    Print (L"DARWINBOOT: unsupported inputs or exception level; firmware retained\\n");
+    return EFI_UNSUPPORTED;"""
+if EARLY not in text:
+    sys.exit("darwinboot-debug: early-rejection anchor missing")
+text = text.replace(EARLY, """    Print (L"DARWINBOOT: unsupported inputs or exception level; firmware retained\\n");
+    {
+      CHAR16  DbEarly[96];
+      UnicodeSPrint (DbEarly, sizeof (DbEarly), L"EARLY CHECK FAILED EL=%lx DT=%lx KX=%lx",
+                     DarwinCurrentEl (), (UINT64)(UINTN)Request->DeviceTree, (UINT64)Request->KextCount);
+      DiagDraw (DbEarly, 0);
+      CpuDeadLoop ();
+    }
+    return EFI_UNSUPPORTED;""", 1)
 
 for anchor, stage in MARKS:
     if anchor not in text:
@@ -71,4 +88,4 @@ text = text.replace(FAIL, '''Fail:
   if (Root != NULL) { Root->Close (Root); }''', 1)
 
 SRC.write_text(text)
-print("darwinboot-debug: failure stage drawn to the framebuffer, then halt")
+print("darwinboot-debug: entry conditions and failure stage drawn to the framebuffer, then halt")
