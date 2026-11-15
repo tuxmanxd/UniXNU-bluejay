@@ -11,16 +11,20 @@
     // The high pair is measured: 2 GiB at 0x880000000 and 2 GiB at
     // 0x900000000, contiguous, with no reservation inside. The first 64 MiB
     // (0x880000000..0x884000000) is the firmware's payload window: BootShim
-    // copies the UniXNU payload there, so the free run starts at 0x884000000
-    // and is 0xfc000000 long. DarwinBoot places its window at
-    // ALIGN(run, 2 MiB) + (kernel base & 2 MiB - 1), which for this kernel is
-    // 0x4000, so at most 0xfc000000 - 0x4000 = 0xfbffc000 bytes fit; floored
-    // to the 2 MiB block the loader requires, that is 0xfbe00000. Declaring
-    // the whole run made AllocateWindow fail with Out of Resources (measured
-    // on the phone: NO WINDOW fc000000 BIG RUN fc000000 @ 884000000).
+    // copies the UniXNU payload there, so the free run starts at 0x884000000.
+    // The run is NOT the full 0xfc000000: measured on the phone it is
+    // 0xF89F6000, because the loader still holds the 49.5 MiB kernel image it
+    // read from the payload while it places the window (it copies segments out
+    // of that image afterwards), and that image lives at the top of DRAM.
+    // DarwinBoot places the window at ALIGN(run, 2 MiB) + (kernel base &
+    // 2 MiB - 1) = 0x884004000 for this kernel, then allocates exactly the
+    // declared size there, so the declared size must leave that slack.
+    // Declared here 0xf0000000 (3840 MiB): 137.9 MiB under the measured run,
+    // which absorbs a varying kernel-image top. Declaring 0xfbe00000 failed
+    // with Out of Resources (NO WINDOW FBE00000 BIG RUN F89F6000 @ 884000000).
     memory@884000000 {
         device_type = "memory";
-        reg = <0x8 0x84000000 0x0 0xfbe00000>;
+        reg = <0x8 0x84000000 0x0 0xf0000000>;
     };
 
     reserved-memory {
