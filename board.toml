@@ -90,10 +90,14 @@ kernel_compression = "none"
 
 [payload]
 volume = "BLUEJAY"
-size_mib = 192
+# The volume travels in the boot image kernel field (shim + FD + envelope +
+# volume), not in the ramdisk: Tensor ABL caps the ramdisk at 32 MiB and the
+# kernel alone is 49.5 MiB. 54 MiB holds the kernel and leaves ~3.7 MiB free;
+# the kernel field is then ~56.1 MiB, under the measured 64 MiB boot_a.
+size_mib = 54
 loader = "firmware"
 title = "UniXNU"
-dram_size = "0x100000000"
+dram_size = "0xfc000000"
 panic_screen = true
 timeout = 3
 kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
@@ -102,7 +106,7 @@ kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]
 # 0x8015 is the Apple chip id the pixelios ADT emitter uses for this port
 # (tools/mkadt.py: chip-id). It is an XNU platform identity, not the GS101 id.
 chip_id = "8015"
-owned_memory_size = "0x100000000"
+owned_memory_size = "0xfc000000"
 unique_chip_id = "required"
 packed_data_ramdisk = true
 psci_method = "smc"
@@ -125,6 +129,9 @@ button-names = ["hold", "voldown", "volup"]
 
 [package]
 unixnu = "../UniXNU"
+# fastboot getvar partition-size:boot_a = 0x4000000. The kernel field carries
+# the payload volume, so the whole image is ~56.1 MiB; verify refuses growth.
+boot_partition_bytes = 67108864
 
 [package.defconfig]
 "ipados-17.7.11-21H461" = "bluejay_defconfig"

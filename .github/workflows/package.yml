@@ -92,5 +92,6 @@ jobs:
           path: |
             UniXNU/out/bluejay/*/*/boot/boot.img
             UniXNU/out/bluejay/*/*/payload/payload.img
+            UniXNU/out/bluejay/*/*/payload/payload.full.img
             UniXNU/out/bluejay/*/*/kernel/kernel.macho
             UniXNU/out/bluejay/*/*/package.manifest.json
