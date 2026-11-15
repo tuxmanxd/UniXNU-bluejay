@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Build the boot image's device tree: board.toml [bootimg] dtb.
 
-The pack stage appends this FDT to the boot image kernel field, so the file has
-to exist inside the release's build tree before `unixnu release` reaches pack.
-The payload step compiles the same DTS for the kernel's own hardware tree, but
-writes it under out/.../device-tree, which is not the path [bootimg] names.
+The pack stage reads this file as `<tree>/<bootimg>.dtb` and appends it to the
+boot image kernel field. The payload step has already compiled the board's DTS
+to `<out>/<device>/<profile>/<config>/device-tree/hardware.dtb` (the same DTS,
+with the SoC include directory resolved), so the firmware preflight copies it.
 
-Run by the firmware preflight list; UNIXNU_DEVICE is the device checkout and
-the working directory is the build tree.
+Run from the build tree; UNIXNU_DEVICE is the device checkout. If the payload
+tree is absent (a bare `unixnu bootimg` run), the DTS is compiled directly.
 """
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -20,8 +21,26 @@ DTS_DIR = DEVICE / "dts"
 
 output = TREE / "build/bluejay/bluejay.dtb"
 output.parent.mkdir(parents=True, exist_ok=True)
-command = ["dtc", "-I", "dts", "-O", "dtb", "-i", str(DTS_DIR), "-o", str(output),
-           str(DTS_DIR / "bluejay.dts")]
+
+hardware = TREE.parent / "device-tree/hardware.dtb"
+if hardware.is_file():
+    shutil.copyfile(hardware, output)
+    print(f"boot device tree: {output.relative_to(TREE)} (from {hardware.name})")
+    sys.exit(0)
+
+# No payload tree: compile the same source. gs101.dtsi lives in the SoC feed
+# checkout under out/feeds; find it the way the release lays it out.
+includes = [DTS_DIR]
+for parent in TREE.parents:
+    feeds = parent / "feeds"
+    if feeds.is_dir():
+        includes += sorted(path for path in feeds.glob("UniXNU-gs101-common-*/dts") if path.is_dir())
+        break
+
+command = ["dtc", "-I", "dts", "-O", "dtb", "-o", str(output)]
+for directory in includes:
+    command += ["-i", str(directory)]
+command.append(str(DTS_DIR / "bluejay.dts"))
 try:
     subprocess.run(command, check=True)
 except FileNotFoundError:
