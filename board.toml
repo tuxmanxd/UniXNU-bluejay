@@ -54,7 +54,7 @@ fd = "Build/bluejayPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
 submodules = ["Binaries", "Common/Mu", "Common/Mu_OEM_Sample", "Silicium-ACPI", "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl"]
 # darwinboot-debug.py is TEMPORARY: it makes a failed xnu boot draw its stage
 # and status on the panel instead of returning to the menu, which repaints.
-preflight = ["scripts/uefi-apply.py", "scripts/build-boot-dtb.py", "scripts/darwinboot-debug.py", "scripts/xnu-mmu-probe.py"]
+preflight = ["scripts/uefi-apply.py", "scripts/build-boot-dtb.py", "scripts/darwinboot-debug.py"]
 packages = [
   "{uefi}",
   "{tree}/package",
@@ -100,14 +100,11 @@ size_mib = 54
 loader = "firmware"
 title = "UniXNU"
 dram_size = "0xf0000000"
-# Bring-up probes on (payload.py runs patch-xnu-entry-probe.py): stage 1 blue
-# at kernel entry, stage 2 magenta before the MMU enable, stage 3 replaced by
-# scripts/xnu-mmu-probe.py because this platform has no PSCI SYSTEM_RESET
-# (measured: PSCI 1.1, FEATURES(SYSTEM_RESET) = -1). The replacement paints the
-# panel white with the MMU off and halts, so white proves the post-MMU path ran.
-# The panic screen cannot be enabled with the probes (0xa1f bytes versus 0x9d0
-# of padding).
-entry_probe_reset_delay = 8
+# The post-MMU probe now lives in the kernel source (patches/xnu/
+# native-bluejay-mmu-probe.patch), so payload.py must leave kernel.macho alone:
+# set neither entry_probe_reset_delay nor panic_screen. The source probe halts
+# with the panel filled white, which is the signal, so a probe patch on top of
+# it would only add a conflicting SCTLR sequence the tool cannot validate.
 panic_screen = false
 timeout = 3
 kernel_args = ["-v", "serial=3", "debug=0x14e", "keepsyms=1"]

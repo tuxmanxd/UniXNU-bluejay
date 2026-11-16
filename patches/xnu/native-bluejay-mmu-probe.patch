@@ -1,0 +1,32 @@
+--- a/osfmk/arm64/start.s
++++ b/osfmk/arm64/start.s
+@@ -754,6 +754,29 @@ common_start:
+ 	MSR_SCTLR_EL1_X0
+ 	isb		sy
+ 
++	// Bring-up probe (bluejay): the first fetch with translation on has now
++	// happened, so the MMU enable and the identity mapping work. Signal it
++	// without a reset: GS101's PSCI reports FEATURES(SYSTEM_RESET) = -1, so a
++	// reset is not available, and nothing is mapped for output yet. This code
++	// still runs at its physical address under the identity mapping, so turn
++	// translation off again, fill the panel white through its physical address
++	// and halt. A white panel means the probe ran; the boot progress bands left
++	// unchanged mean the fetch after the SCTLR write faulted, which points at
++	// the bootstrap tables or at the boot_args memory fields.
++	mrs		x9, SCTLR_EL1
++	bic		x9, x9, #1								// clear M
++	msr		SCTLR_EL1, x9
++	isb		sy
++	movz	x10, #0xFAC0, lsl #16					// GS101 framebuffer base
++	movz	x11, #0x8D00							// 0x9E3400 bytes of pixels
++	movk	x11, #0x27, lsl #16
++	movn	w12, #0
++1:	str		w12, [x10], #4
++	subs	x11, x11, #1
++	b.ne	1b
++2:	wfe
++	b		2b
++
+ #if !VMAPPLE
+ 	MOV64   x1, SCTLR_EL1_DEFAULT
+ 	cmp		x0, x1
